@@ -1,6 +1,6 @@
 # EPYfunctional
 
-This code is associated with the paper:
+The code contained in this repository is associated with the paper:
 
   Rigon, T. (2022+). *An enriched mixture model for functional clustering*. [ArXiV](https://arxiv.org/abs/1907.02493)
 

@@ -1,5 +1,3 @@
-# library(mvtnorm)
-
 ldet <- function(x) {
   if (!is.matrix(x)) {
     return(log(x))
@@ -100,9 +98,7 @@ EFDMP <- function(X, Hl, L, B, indexB, time = NULL, cc,
   lower2 <- lower6 <- numeric(L)
   lowerbound <- -Inf
 
-  # -------------------------------------------------
-  # Initialization settings
-  # -------------------------------------------------
+  # Initialization settings ---------------------------------------
 
   if(verbose){ cat("Pre-allocating observations into groups...\n")}
 
@@ -112,21 +108,18 @@ EFDMP <- function(X, Hl, L, B, indexB, time = NULL, cc,
   G          <- factor(as.numeric(factor(G,levels(G)[order(table(G),decreasing = TRUE)])),levels=1:H)
   rho <- cbind(model.matrix(rep(1,n) ~ G - 1))
 
-  # Mixing weights are essentially assigned at random
-  # rho <- matrix(runif(n * H), n, H)
+  # rho <- matrix(runif(n * H), n, H) # Mixing weights are essentially assigned at random
   rho <- rho / rowSums(rho)
   sums_rho <- colSums(rho)
 
-  # This is a raw "estimate" for the parameters of the variance. The weights are not used at all
+  # This is a raw "estimate" for the parameters of the variance. 
   a_sigma2_tilde <- a_sigma + nTT / 2
   b_sigma2_tilde <- b_sigma + sum((X - mean(X))^2, na.rm = TRUE) / 2
 
   E_tau <- a_sigma2_tilde / b_sigma2_tilde # Expected value of tau
   E_ltau <- digamma(a_sigma2_tilde) - log(b_sigma2_tilde)
 
-  # -------------------------------------------------------
-  # Starting the CAVI algorithm
-  # -------------------------------------------------------
+  # Starting the CAVI algorithm ---------------------------
 
   if (verbose) {
     cat("Starting the Variational Bayes algorithm...\n")
@@ -138,17 +131,6 @@ EFDMP <- function(X, Hl, L, B, indexB, time = NULL, cc,
       for (h in 1:Hl[l]) {
         # Set the h_id
         h_id <- sum(Hl[1:l]) - Hl[l] + h
-
-        #        if (sum(rho[, h_id]) < 1e-12) { # Here it is h_id
-        #          Sigma_tilde[[l]][h, , ] <- Sigma[[l]] # Here is just h
-        #          mu_tilde[[l]][h, ] <- rep(0, Ml[l])
-        #          predH[h_id, ] <- rep(0, TT)
-
-        #  # Allocating the residuals
-        #  for (i in 1:n) {
-        #    E_residuals[h_id, i, ] <- X[i, ]^2 - 2 * X[i, ] * predH[h_id, ] + predH[h, ]^2 + traceBSigmaB[, l]
-        #  }
-        # } else {
         weights <- rep(rho[, h_id], n_subject) # This associate to each subject / observation a weight
 
         Sigma_tilde[[l]][h, , ] <- solve(E_tau * crossprod(BB[, indexB[l, ]] * sqrt(weights)) + PSigma[[l]])
@@ -165,7 +147,7 @@ EFDMP <- function(X, Hl, L, B, indexB, time = NULL, cc,
       }
     }
 
-    # Update Pi and p, for l=1,...,L
+    # Update Pi and p, for l = 1,...,L
     for (l in 1:L) {
       alpha_tilde[l] <- alpha[l] + sum(rho[, which(Findex == l)])
       for (h in 1:Hl[l]) {
@@ -280,6 +262,7 @@ EFDMP <- function(X, Hl, L, B, indexB, time = NULL, cc,
   return(out)
 }
 
+# Function that is used for the initialization --------------------
 
 FB_clust <- function(X, Hl, L, B, indexB, time = NULL, prediction = TRUE, ...) {
 
