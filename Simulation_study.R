@@ -80,7 +80,7 @@ p0 <- ggplot(data = data_plot, aes(x = Var2, y = value, group = as.factor(Var1))
   theme(legend.position = "none")
 p0
 
-# Estimation E-FDP----------------------------------------
+# Estimation E-FDMP----------------------------------------
 
 library(splines)
 L <- 4
@@ -146,9 +146,7 @@ p1 <- ggplot(data = data_plot, aes(x = Var2, y = value, group = as.factor(Var1))
   theme(legend.position = "none")
 p1
 
-# ------------------------------------------
-# FDP - FULL MODEL
-# ------------------------------------------
+# Mixture parametric ------------------------------------------------
 
 L <- 1
 B <- cbind(
@@ -221,9 +219,7 @@ p2 <- ggplot(data = data_plot, aes(x = Var2, y = value, group = as.factor(Var1))
   theme(legend.position = "none")
 p2
 
-# ------------------------------------------
-# FDP - SPLINES
-# ------------------------------------------
+# Mixture splines --------------------------------------------
 
 library(splines)
 L <- 1
@@ -292,7 +288,7 @@ p3 <- ggplot(data = data_plot, aes(x = Var2, y = value, group = as.factor(Var1))
   theme(legend.position = "none")
 p3
 
-# Final results
+# Final results --------------------------------
 tab <- cbind(cbind(summary(apply(dataset_signal - fit$prediction, 1, function(x) sqrt(mean(x^2) - mean(x)^2))),
 summary(apply(dataset_signal - fit2$prediction, 1, function(x) sqrt(mean(x^2) - mean(x)^2))),
 summary(apply(dataset_signal - fit3$prediction, 1, function(x) sqrt(mean(x^2) - mean(x)^2)))),
@@ -300,11 +296,6 @@ summary(apply(dataset_signal - fit3$prediction, 1, function(x) sqrt(mean(x^2) - 
 cbind(summary(apply(dataset_signal - fit$prediction, 1, function(x) mean(abs(x)))),
 summary(apply(dataset_signal - fit2$prediction, 1, function(x) mean(abs(x)))),
 summary(apply(dataset_signal - fit3$prediction, 1, function(x) mean(abs(x))))))
-
-library(xtable)
-xtable(tab, digits = 3)
-
-library(gridExtra)
 
 fit_kmeans <- kmeans(dataset_high_signal, 16, nstart = 20)
 
