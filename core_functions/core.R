@@ -100,19 +100,21 @@ EFDMP <- function(X, Hl, L, B, indexB, time = NULL, cc,
 
   # Initialization settings ---------------------------------------
 
-  if(verbose){ cat("Pre-allocating observations into groups...\n")}
+  if (verbose) {
+    cat("Pre-allocating observations into groups...\n")
+  }
 
   # Divide observations in cluster and perturbate the weights a bit.
-  pre_clust  <- FB_clust(X=X,  Hl=Hl, L =L, B = B, indexB = indexB, time = time, prediction = TRUE)
-  G          <- as.factor(pre_clust$cluster)
-  G          <- factor(as.numeric(factor(G,levels(G)[order(table(G),decreasing = TRUE)])),levels=1:H)
-  rho <- cbind(model.matrix(rep(1,n) ~ G - 1))
+  pre_clust <- FB_clust(X = X, Hl = Hl, L = L, B = B, indexB = indexB, time = time, prediction = TRUE)
+  G <- as.factor(pre_clust$cluster)
+  G <- factor(as.numeric(factor(G, levels(G)[order(table(G), decreasing = TRUE)])), levels = 1:H)
+  rho <- cbind(model.matrix(rep(1, n) ~ G - 1))
 
   # rho <- matrix(runif(n * H), n, H) # Mixing weights are essentially assigned at random
   rho <- rho / rowSums(rho)
   sums_rho <- colSums(rho)
 
-  # This is a raw "estimate" for the parameters of the variance. 
+  # This is a raw "estimate" for the parameters of the variance.
   a_sigma2_tilde <- a_sigma + nTT / 2
   b_sigma2_tilde <- b_sigma + sum((X - mean(X))^2, na.rm = TRUE) / 2
 

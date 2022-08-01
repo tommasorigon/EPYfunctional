@@ -289,13 +289,18 @@ p3 <- ggplot(data = data_plot, aes(x = Var2, y = value, group = as.factor(Var1))
 p3
 
 # Final results --------------------------------
-tab <- cbind(cbind(summary(apply(dataset_signal - fit$prediction, 1, function(x) sqrt(mean(x^2) - mean(x)^2))),
-summary(apply(dataset_signal - fit2$prediction, 1, function(x) sqrt(mean(x^2) - mean(x)^2))),
-summary(apply(dataset_signal - fit3$prediction, 1, function(x) sqrt(mean(x^2) - mean(x)^2)))),
-
-cbind(summary(apply(dataset_signal - fit$prediction, 1, function(x) mean(abs(x)))),
-summary(apply(dataset_signal - fit2$prediction, 1, function(x) mean(abs(x)))),
-summary(apply(dataset_signal - fit3$prediction, 1, function(x) mean(abs(x))))))
+tab <- cbind(
+  cbind(
+    summary(apply(dataset_signal - fit$prediction, 1, function(x) sqrt(mean(x^2) - mean(x)^2))),
+    summary(apply(dataset_signal - fit2$prediction, 1, function(x) sqrt(mean(x^2) - mean(x)^2))),
+    summary(apply(dataset_signal - fit3$prediction, 1, function(x) sqrt(mean(x^2) - mean(x)^2)))
+  ),
+  cbind(
+    summary(apply(dataset_signal - fit$prediction, 1, function(x) mean(abs(x)))),
+    summary(apply(dataset_signal - fit2$prediction, 1, function(x) mean(abs(x)))),
+    summary(apply(dataset_signal - fit3$prediction, 1, function(x) mean(abs(x))))
+  )
+)
 
 fit_kmeans <- kmeans(dataset_high_signal, 16, nstart = 20)
 
@@ -305,7 +310,7 @@ mcclust::vi.dist(clusters, as.numeric(fit$cluster))
 mcclust::vi.dist(clusters, as.numeric(fit2$cluster))
 mcclust::vi.dist(clusters, as.numeric(fit3$cluster))
 
-ggsave("../sim0.pdf", p0, width=10,height=6)
-ggsave("../sim1.pdf", p1, width=10,height=6)
-ggsave("../sim2.pdf", p2, width=10,height=6)
-ggsave("../sim3.pdf", p3, width=10,height=6)
+ggsave("../sim0.pdf", p0, width = 10, height = 6)
+ggsave("../sim1.pdf", p1, width = 10, height = 6)
+ggsave("../sim2.pdf", p2, width = 10, height = 6)
+ggsave("../sim3.pdf", p3, width = 10, height = 6)
