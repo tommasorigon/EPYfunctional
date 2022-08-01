@@ -24,7 +24,7 @@ indexB <- matrix(c(
 
 
 # Specification of the true curves ----------------------------
-set.seed(123)
+set.seed(1234)
 f_curves <- matrix(0, nrow = 16, ncol = TT)
 par(mfrow = c(1, 1))
 plot(time, rep(0, TT), type = "l", lty = "dotted", ylim = c(-5, 5))
@@ -56,7 +56,7 @@ for (i in 1:4) {
 SE <- 0.3
 dataset_signal <- matrix(0, n, TT)
 clusters <- rep(0, n)
-set.seed(103)
+set.seed(100)
 
 for (i in 1:n) {
   id <- sample(1:16, 1) # Uniform probabilities
@@ -71,7 +71,7 @@ library(ggplot2)
 data_plot <- reshape2::melt(dataset_high_signal)
 data_plot2 <- reshape2::melt(f_curves)
 p0 <- ggplot(data = data_plot, aes(x = Var2, y = value, group = as.factor(Var1))) +
-  geom_line(alpha = 0.1, col = "darkblue") +
+  geom_line(alpha = 0.2, col = "gray") +
   theme_bw() +
   scale_colour_brewer(palette = "Set1") +
   ylab("y") +
@@ -100,13 +100,13 @@ registerDoMC(6)
 
 # Select different seeds
 set.seed(555)
-seeds <- sample(1:2^15, 10) # Convergence occurs always.
+seeds <- sample(1:2^15, 50) # Convergence occurs always.
 
 lower_bounds <- foreach(seeds = seeds, .combine = rbind) %dopar% {
   set.seed(seeds)
   out <- EFDMP(
     X = dataset_high_signal, Hl = Hl, L = L, B = B, indexB = indexB, time = time, cc = cc,
-    alpha = alpha, Sigma = Sigma, a_sigma = a_sigma, b_sigma = b_sigma, verbose = TRUE, maxiter = 1500
+    alpha = alpha, Sigma = Sigma, a_sigma = a_sigma, b_sigma = b_sigma, verbose = TRUE, maxiter = 1500, tol = 1e-12
   )
   Rsquared <- 1 - sum((dataset_high_signal - out$prediction)^2) / sum((dataset_high_signal - mean(dataset_high_signal))^2)
   Kunique <- length(unique(out$cluster))
@@ -176,7 +176,7 @@ registerDoMC(6)
 
 # Select different seeds
 set.seed(555)
-seeds <- sample(1:2^15, 10) # Convergence occurs always.
+seeds <- sample(1:2^15, 50) # Convergence occurs always.
 
 lower_bounds2 <- foreach(seeds = seeds, .combine = rbind) %dopar% {
   set.seed(seeds)
@@ -247,7 +247,7 @@ registerDoMC(6)
 
 # Select different seeds
 set.seed(555)
-seeds <- sample(1:2^15, 10) # Convergence occurs always.
+seeds <- sample(1:2^15, 50) # Convergence occurs always.
 
 lower_bounds3 <- foreach(seeds = seeds, .combine = rbind) %dopar% {
   set.seed(seeds)
@@ -293,13 +293,28 @@ p3 <- ggplot(data = data_plot, aes(x = Var2, y = value, group = as.factor(Var1))
 p3
 
 # Final results
-cbind(summary(apply(dataset_signal - fit$prediction, 1, function(x) sqrt(mean(x^2) - mean(x)^2))),
+tab <- cbind(cbind(summary(apply(dataset_signal - fit$prediction, 1, function(x) sqrt(mean(x^2) - mean(x)^2))),
 summary(apply(dataset_signal - fit2$prediction, 1, function(x) sqrt(mean(x^2) - mean(x)^2))),
-summary(apply(dataset_signal - fit3$prediction, 1, function(x) sqrt(mean(x^2) - mean(x)^2))))
+summary(apply(dataset_signal - fit3$prediction, 1, function(x) sqrt(mean(x^2) - mean(x)^2)))),
 
 cbind(summary(apply(dataset_signal - fit$prediction, 1, function(x) mean(abs(x)))),
 summary(apply(dataset_signal - fit2$prediction, 1, function(x) mean(abs(x)))),
-summary(apply(dataset_signal - fit3$prediction, 1, function(x) mean(abs(x)))))
+summary(apply(dataset_signal - fit3$prediction, 1, function(x) mean(abs(x))))))
+
+library(xtable)
+xtable(tab, digits = 3)
 
 library(gridExtra)
-grid.arrange(p1, p2, p3)
+
+fit_kmeans <- kmeans(dataset_high_signal, 16, nstart = 20)
+
+library(mcclust)
+mcclust::vi.dist(clusters, fit_kmeans$cluster)
+mcclust::vi.dist(clusters, as.numeric(fit$cluster))
+mcclust::vi.dist(clusters, as.numeric(fit2$cluster))
+mcclust::vi.dist(clusters, as.numeric(fit3$cluster))
+
+ggsave("../sim0.pdf", p0, width=10,height=6)
+ggsave("../sim1.pdf", p1, width=10,height=6)
+ggsave("../sim2.pdf", p2, width=10,height=6)
+ggsave("../sim3.pdf", p3, width=10,height=6)
